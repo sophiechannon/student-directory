@@ -22,11 +22,6 @@ def input_students
   students
 end
 
-def print_header
-  puts "The students of Villains Academy"
-  puts "-------------"
-end
-
 def print_students(names)
   names.each_with_index do |student, index| 
     subject_pronoun = ""
@@ -49,6 +44,11 @@ def print_students(names)
     puts "#{subject_pronoun.capitalize} #{being_verb} #{student[:height]}cm tall and #{possessive_pronoun} hobbies are"
     puts "#{student[:hobbies].join(", ")}."
   end
+end
+
+def print_header
+  puts "The students of Villains Academy".center(50)
+  puts "-------------".center(50)
 end
 
 def print_footer(names)
