@@ -1,37 +1,22 @@
 def input_students
-  puts "Please enter the names of the students"
-
   students = []
 
-  name = gets.chomp.capitalize
-  puts "Please enter their gender (M/F/NB)"
-  gender = gets.chomp.upcase
-  puts "Please enter the student's height in cm"
-  height = gets.chomp.to_i
-  puts "Please enter their hobbies (press return twice to move on)"
-  hobbies = []
   while true do
-    input = gets.chomp.downcase
-    !input.empty? ? hobbies << input : break
-  end
-
-
-  while true do
-    students << {name: name, cohort: :november, gender: gender, height: height, hobbies: hobbies }
-    puts "Now we have #{students.count} students"
     puts "Enter next student name or press return twice to exit"
     name = gets.chomp.capitalize
     break if name.empty?
     puts "Please enter their gender (M/F/NB)"
     gender = gets.chomp.upcase
     puts "Please enter the student's height in cm"
-    height = gets.chomp
+    height = gets.chomp.to_i
     puts "Please enter their hobbies"
     hobbies = []
     while true do
       input = gets.chomp.downcase
       !input.empty? ? hobbies << input : break
     end
+    students << {name: name, cohort: :November, gender: gender, height: height, hobbies: hobbies }
+    puts "Now we have #{students.count} students"
   end
 
   students
@@ -70,7 +55,13 @@ def print_footer(names)
   puts "Overall, we have #{names.count} great students"
 end
 
+def blank_line
+  puts ""
+end
+
 students = input_students
 print_header
+blank_line
 print_students(students)
+blank_line
 print_footer(students)
