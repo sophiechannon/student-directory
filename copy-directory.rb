@@ -3,12 +3,6 @@
 # ````
 @students = []
 
-=begin
-@months = [:January, :February, :March, 
-          :April, :May, :June, 
-          :July, :August, :September, 
-          :October, :November, :December] #validation
-=end
 require 'date'
 @months = Date::MONTHNAMES
 
@@ -30,19 +24,16 @@ def interactive_menu
 end
 
 def print_menu
+  blank_line
+  puts "What would you like to do?"
+  blank_line
   puts "1. Input the students"
   puts "2. Show the students"
   puts "3. Save students to file"
   puts "4. Load students from file"
+  puts "5. Search students by cohort"
+  puts "6. View students by cohort"
   puts "9. Exit"
-end
-
-def show_students
-  print_header
-  print_students if @students.count > 0
-  blank_line
-  @students.empty? ? print_footer_no_students : print_footer
-  blank_line
 end
 
 def process(selection)
@@ -56,11 +47,27 @@ def process(selection)
     save_students
   when "4"
     load_students
+  when "5"
+    print_by_cohort 
+  when "6"
+    print_by_cohort_all
+  when "7"
+    puts "I haven't set that one yet, oops"
+  when "8"
+    puts "I haven't set that one yet, oops"
   when "9"
     exit
   else
     puts "Please enter a number between 1 and 9..."
   end
+end
+
+def show_students
+  print_header
+  print_students if @students.count > 0
+  blank_line
+  @students.empty? ? print_footer_no_students : print_footer
+  blank_line
 end
 
 def save_students(filename = "students.csv")
@@ -109,18 +116,37 @@ def save_or_load_new
   filename
 end
 
-def try_load_students(filename = "students.csv")
-  filename = ARGV.first unless ARGV.first.nil? # first argument from the command line
-  if File.exist?(filename) # check file exists
-    load_students(filename)
-  else # if it doesn't exists
-    puts "Sorry, #{filename} does not exist."
-    exit
+def print_by_cohort #user enters the cohort they would like to see
+  puts "Which cohort would you like to see?"
+  #validation - user input matches a valid month
+  while true do
+    cohort = STDIN.gets.chomp.capitalize
+    break if @months.any? {|month| month == cohort}
+  end
+  #creating a new array with just names of student in the selected cohort
+  result = @students.select { |student| student[:cohort] == cohort }
+  #print names, or error message
+  if result.empty? 
+    puts "There are no students enrolled on this cohort"
+  else
+    result.each { |student| puts student[:name] }
   end
 end
 
-def print_load_success_text(filename)
-  puts "Loaded #{@students.count} entries from #{filename}"
+def print_by_cohort_all #shows all student names split by cohort
+  cohorts = {}
+  @students.each do |student|
+    cohort = student[:cohort]
+    #checking if there is already a key for the cohort & creating a new one if not
+    cohorts[cohort] = [] if cohorts[cohort] == nil
+    #pushing student name to corresponding key
+    cohorts[cohort] << student[:name]
+  end
+  cohorts.each do |key, value|
+    puts key.to_s.center(20)
+    puts value
+    blank_line
+  end
 end
 
 # ````
@@ -153,11 +179,11 @@ def input_students
 end
 
 def push_to_students(name, cohort, gender, height, hobbies)
-  @students << {name: name, cohort: cohort.to_sym, gender: gender, height: height.to_i, hobbies: hobbies}
+  @students << {name: name, cohort: cohort, gender: gender, height: height.to_i, hobbies: hobbies}
 end
 
 def set_gender
-  gender = STDIN.gets.delete("\n").upcase #using an alternative to chomp
+  gender = STDIN.gets.delete("\n").upcase # using an alternative to chomp for test
   #checking that input matches validation, using neutral as default
   case gender 
   when "M"
@@ -192,6 +218,20 @@ def set_hobbies
   hobbies
 end
 
+def try_load_students(filename = "students.csv")
+  filename = ARGV.first unless ARGV.first.nil? # first argument from the command line
+  if File.exist?(filename) # check file exists
+    load_students(filename)
+  else # if it doesn't exists
+    puts "Sorry, #{filename} does not exist."
+    exit
+  end
+end
+
+# ````
+# printing methods
+# ````
+
 def student_input_count
   text = "Now we have #{@students.count} student"
   #pluralises sentence if there are multiple students
@@ -213,39 +253,8 @@ def print_students
   end
 end
 
-def print_by_cohort #user enters the cohort they would like to see
-  if @student.count > 0
-    puts "Which cohort would you like to see?"
-    #validation - user input matches a valid month
-    while true do
-      cohort = STDIN.gets.chomp.capitalize.to_sym
-      break if @months.any? {|month| month == cohort}
-    end
-    #creating a new array with just names of student in the selected cohort
-    result = names.select { |student| student[:cohort] == cohort }
-    #print names, or error message
-    if result.empty? 
-      puts "There are no students enrolled on this cohort"
-    else
-      result.each { |student| puts student[:name] }
-    end
-  end
-end
-
-def print_by_cohort_all #shows all student names split by cohort
-  cohorts = {}
-  @student.each do |student|
-    cohort = student[:cohort]
-    #checking if there is already a key for the cohort & creating a new one if not
-    cohorts[cohort] = [] if cohorts[cohort] == nil
-    #pushing student name to corresponding key
-    cohorts[cohort] << student[:name]
-  end
-  cohorts.each do |key, value|
-    puts key.to_s.center(20)
-    puts value
-    blank_line
-  end
+def print_load_success_text(filename)
+  puts "Loaded #{@students.count} entries from #{filename}"
 end
 
 def print_header
