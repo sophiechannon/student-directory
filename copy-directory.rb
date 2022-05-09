@@ -35,7 +35,8 @@ def input_students
     end
 
     students << {name: name, cohort: cohort, gender: gender, height: height, hobbies: hobbies }
-    puts "Now we have #{students.count} students"
+    text = "Now we have #{students.count} student"
+    puts students.count > 1 ? "#{text}s" : text
   end
 
   students
@@ -51,8 +52,12 @@ def print_students(names)
   names.each_with_index do |student, index| 
     gender = student[:gender]
     puts "#{index + 1}. #{student[:name]} (#{student[:cohort]} cohort)"
-    puts "#{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall and #{$pronoun[gender][:possessive]} hobbies are"
-    puts "#{student[:hobbies].join(", ")}."
+    if student[:height] > 0
+      puts " - #{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall"
+    end
+    if student[:hobbies] != []
+      puts " - #{$pronoun[gender][:possessive]} hobbies are #{student[:hobbies].join(", ")}."
+    end
   end
 end
 
@@ -87,7 +92,8 @@ def print_header
 end
 
 def print_footer(names)
-  puts "Overall, we have #{names.count} great students"
+  text =  "Overall, we have #{names.count} great student."
+  puts names.count > 1 ? text.insert(-2, "s") : text
 end
 
 def blank_line
@@ -98,7 +104,9 @@ students = input_students
 print_header
 blank_line
 print_students(students)
+blank_line
 print_by_cohort_all(students)
-print_students(students)
+blank_line
+print_by_cohort(students)
 blank_line
 print_footer(students)
