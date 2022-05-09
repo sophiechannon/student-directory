@@ -3,15 +3,19 @@
 # ````
 @students = []
 
+=begin
 @months = [:January, :February, :March, 
           :April, :May, :June, 
           :July, :August, :September, 
           :October, :November, :December] #validation
+=end
+require 'date'
+@months = Date::MONTHNAMES
 
 $pronoun = {
-  male: {subject: "he", verb: "is", possessive: "his"},
-  female: {subject: "she", verb: "is", possessive: "her"},
-  neutral: {subject: "they", verb: "are", possessive: "their"}
+  "male" => {subject: "he", verb: "is", possessive: "his"},
+  "female" => {subject: "she", verb: "is", possessive: "her"},
+  "neutral" => {subject: "they", verb: "are", possessive: "their"}
 }
 
 # ````
@@ -21,7 +25,7 @@ $pronoun = {
 def interactive_menu
   loop do
     print_menu
-    process(gets.chomp)
+    process(STDIN.gets.chomp)
   end
 end
 
@@ -35,15 +39,17 @@ end
 
 def show_students
   print_header
-  print_students
+  print_students if @students.count > 0
   blank_line
-  print_footer
+  @students.empty? ? print_footer_no_students : print_footer
+  blank_line
 end
 
 def process(selection)
   case selection
   when "1"
     students = input_students
+    puts "input complete"
   when "2"
     show_students
   when "3"
@@ -57,9 +63,13 @@ def process(selection)
   end
 end
 
-def save_students
+def save_students(filename = "students.csv")
+  puts "You are about to save to #{filename}"
+  puts "Enter `Yes` if you would you like to save to a a new or existing file instead?"
+  input = gets.chomp.downcase
+  filename = save_new if input == "yes"
   #open file for writing
-  file = File.open("students.csv", "a")
+  file = File.open(filename, "w")
   #iterate over students array
   @students.each do |student|
     #converting hash into array
@@ -69,19 +79,43 @@ def save_students
     file.puts(csv_line)
   end 
   file.close
+  puts "save to #{filename} complete"
 end
 
-def load_students
+def save_new
+  puts "Enter file name"
+  filename = STDIN.gets.chomp
+  filename = "#{filename}.csv" if !filename.include?(".csv")
+  filename
+end
+
+
+def load_students(filename = "students.csv")
   # open file for reading
-  file = File.open("students.csv", "r")
+  file = File.open(filename, "r")
   # iterate over each line of the file
   file.readlines.each do |line|
     line = line.chomp.split(",")
     name, cohort, gender, height = line[0..3]
     hobbies = line[4..-1]
-    @students << {name: name, cohort: cohort.to_sym, gender: gender.to_sym, height: height.to_i, hobbies: hobbies}
+    push_to_students(name, cohort, gender, height, hobbies)
   end
   file.close
+  print_load_success_text(filename)
+end
+
+def try_load_students(filename = "students.csv")
+  filename = ARGV.first unless ARGV.first.nil? # first argument from the command line
+  if File.exist?(filename) # check file exists
+    load_students(filename)
+  else # if it doesn't exists
+    puts "Sorry, #{filename} does not exist."
+    exit
+  end
+end
+
+def print_load_success_text(filename)
+  puts "Loaded #{@students.count} entries from #{filename}"
 end
 
 # ````
@@ -91,7 +125,7 @@ end
 def input_students
   while true do
     puts "Enter next student name or press return twice to exit"
-    name = gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ") #getting the name and ensuring each word is capitalized
+    name = STDIN.gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ") #getting the name and ensuring each word is capitalized
     break if name.empty?
 
     # assigning centre through set_gender method
@@ -99,40 +133,46 @@ def input_students
     gender = set_gender
 
     puts "Which cohort #{$pronoun[gender][:verb]} #{$pronoun[gender][:subject]} on?"
+    puts "leave blank if they are in the current month's cohort"
     cohort = set_cohort
 
     puts "Please enter #{$pronoun[gender][:possessive]} height in cm"
-    height = gets.chomp.to_i #to_i deletes any additional characters such as "cm"
+    height = STDIN.gets.chomp
 
     puts "Please enter #{$pronoun[gender][:possessive]} hobbies, press return twice when done"
     hobbies = set_hobbies
 
-    @students << {name: name, cohort: cohort, gender: gender, height: height, hobbies: hobbies }
-    
+    push_to_students(name, cohort, gender, height, hobbies)
     student_input_count
   end
 end
 
+def push_to_students(name, cohort, gender, height, hobbies)
+  @students << {name: name, cohort: cohort.to_sym, gender: gender, height: height.to_i, hobbies: hobbies}
+end
+
 def set_gender
-  gender = gets.delete("\n").upcase #using an alternative to chomp
+  gender = STDIN.gets.delete("\n").upcase #using an alternative to chomp
   #checking that input matches validation, using neutral as default
   case gender 
   when "M"
-    gender = :male
+    gender = "male"
   when "F"
-    gender = :female
+    gender = "female"
   else
-    gender = :neutral
+    gender = "neutral"
   end
   gender
 end
 
 def set_cohort
+  current_month = Time.now.month
   while true do
-    cohort = gets.chomp.capitalize.to_sym
-    cohort = :November if cohort.empty?
+    cohort = STDIN.gets.chomp.capitalize
+    # using current month as default if no month entered
+    cohort = @months[current_month] if cohort.empty?
     #checking that input matches validation
-    break if @months.any? { |month| month == cohort }
+    break if @months[1..12].any? { |month| month == cohort }
   end
   cohort
 end
@@ -141,7 +181,7 @@ def set_hobbies
   hobbies = []
   #allows input of multiple hobbies into an array
   while true do
-    input = gets.chomp.downcase
+    input = STDIN.gets.chomp.downcase
     !input.empty? ? hobbies << input : break
   end
   hobbies
@@ -154,18 +194,16 @@ def student_input_count
 end
 
 def print_students
-  if @students.count > 0
-    @students.each_with_index do |student, index| 
-      gender = student[:gender]
-      puts "#{index + 1}. #{student[:name]} (#{student[:cohort]} cohort)"
-      #if they didn't enter anything, don't print height
-      if student[:height] > 0
-        puts " - #{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall"
-      end
-      # if they didn't enter anything, don't print hobbies
-      if student[:hobbies] != []
-        puts " - #{$pronoun[gender][:possessive].capitalize} hobbies: #{student[:hobbies].join(", ")}"
-      end
+  @students.each_with_index do |student, index| 
+    gender = student[:gender]
+    puts "#{index + 1}. #{student[:name]} (#{student[:cohort]} cohort)"
+    #if they didn't enter anything, don't print height
+    if student[:height] > 0
+      puts " - #{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall"
+    end
+    # if they didn't enter anything, don't print hobbies
+    if student[:hobbies] != []
+      puts " - #{$pronoun[gender][:possessive].capitalize} hobbies: #{student[:hobbies].join(", ")}"
     end
   end
 end
@@ -175,7 +213,7 @@ def print_by_cohort #user enters the cohort they would like to see
     puts "Which cohort would you like to see?"
     #validation - user input matches a valid month
     while true do
-      cohort = gets.chomp.capitalize.to_sym
+      cohort = STDIN.gets.chomp.capitalize.to_sym
       break if @months.any? {|month| month == cohort}
     end
     #creating a new array with just names of student in the selected cohort
@@ -213,17 +251,16 @@ end
 def print_footer
   text =  "Overall, we have #{@students.count} great student."
   #different approach to addressing plural in the case of multiple students / no students
-  if @students.count > 1
-    puts text.insert(-2, "s")
-  elsif @students.count == 0
-    puts "We currently have no students :("
-  else
-    puts text
-  end
+  puts @students.count > 1 ? text.insert(-2, "s") : text
+end
+
+def print_footer_no_students
+  puts "We currently habve no students :("
 end
 
 def blank_line
   puts nil
 end
 
+try_load_students
 interactive_menu
