@@ -2,19 +2,7 @@
 def interactive_menu
   loop do
     print_menu
-    user_input = gets.chomp
-    case user_input
-    when "1"
-      students = input_students
-    when "2"
-      show_students
-    when "9"
-      exit
-    else
-      puts "Please enter a number between 1 and 9..."
-    end
-
-
+    process(gets.chomp)
   end
 end
 
@@ -29,6 +17,19 @@ def show_students
   print_students(@students)
   blank_line
   print_footer(@students)
+end
+
+def process(selection)
+  case selection
+  when "1"
+    students = input_students
+  when "2"
+    show_students
+  when "9"
+    exit
+  else
+    puts "Please enter a number between 1 and 9..."
+  end
 end
 
 
