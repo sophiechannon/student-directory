@@ -64,10 +64,11 @@ def process(selection)
 end
 
 def save_students(filename = "students.csv")
+  # check if they want to save or save as
   puts "You are about to save to #{filename}"
-  puts "Enter `Yes` if you would you like to save to a a new or existing file instead?"
+  puts "Hit enter to continue or type any key followed by enter to save to another / new file"
   input = gets.chomp.downcase
-  filename = save_new if input == "yes"
+  filename = save_or_load_new if !input.empty?
   #open file for writing
   file = File.open(filename, "w")
   #iterate over students array
@@ -82,15 +83,12 @@ def save_students(filename = "students.csv")
   puts "save to #{filename} complete"
 end
 
-def save_new
-  puts "Enter file name"
-  filename = STDIN.gets.chomp
-  filename = "#{filename}.csv" if !filename.include?(".csv")
-  filename
-end
-
-
 def load_students(filename = "students.csv")
+  # check this is the file they want to open
+  puts "You are about to open our default file: #{filename}"
+  puts "Hit enter to continue or type any letter followed by enter to open a different file"
+  input = gets.chomp.downcase
+  filename = save_or_load_new if input == "yes"
   # open file for reading
   file = File.open(filename, "r")
   # iterate over each line of the file
@@ -102,6 +100,13 @@ def load_students(filename = "students.csv")
   end
   file.close
   print_load_success_text(filename)
+end
+
+def save_or_load_new
+  puts "Enter file name"
+  filename = STDIN.gets.chomp
+  filename = "#{filename}.csv" if !filename.include?(".csv")
+  filename
 end
 
 def try_load_students(filename = "students.csv")
