@@ -9,6 +9,10 @@ $pronoun = {
   neutral: {subject: "they", verb: "are", possessive: "their"}
 }
 
+# ````
+# menu methods
+# ````
+
 def interactive_menu
   loop do
     print_menu
@@ -16,13 +20,10 @@ def interactive_menu
   end
 end
 
-# ````
-# menu methods
-# ````
-
 def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
+  puts "3. Save students to file"
   puts "9. Exit"
 end
 
@@ -39,11 +40,27 @@ def process(selection)
     students = input_students
   when "2"
     show_students
+  when "3"
+    save_students
   when "9"
     exit
   else
     puts "Please enter a number between 1 and 9..."
   end
+end
+
+def save_students
+  #open file for writing
+  file = File.open("students.csv", "w")
+  #iterate over students array
+  @students.each do |student|
+    #converting hash into array
+    student_data = [student[:name], student[:cohort], student[:gender], student[:height], student[:hobbies]]
+    #converting array into string
+    csv_line = student_data.join(",")
+    file.puts(csv_line)
+  end 
+  file.close
 end
 
 # ````
@@ -192,18 +209,5 @@ end
 def blank_line
   puts nil
 end
-
-=begin
-students = input_students
-print_header
-blank_line
-print_students(students)
-blank_line
-print_by_cohort_all(students)
-blank_line
-print_by_cohort(students)
-blank_line
-print_footer(students)
-=end
 
 interactive_menu
