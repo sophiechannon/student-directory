@@ -24,6 +24,7 @@ def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
   puts "3. Save students to file"
+  puts "4. Load students from file"
   puts "9. Exit"
 end
 
@@ -42,6 +43,8 @@ def process(selection)
     show_students
   when "3"
     save_students
+  when "4"
+    load_students
   when "9"
     exit
   else
@@ -55,11 +58,22 @@ def save_students
   #iterate over students array
   @students.each do |student|
     #converting hash into array
-    student_data = [student[:name], student[:cohort], student[:gender], student[:height], student[:hobbies]]
+    student_data = [student[:name], student[:cohort], student[:gender], student[:height]]
     #converting array into string
     csv_line = student_data.join(",")
     file.puts(csv_line)
   end 
+  file.close
+end
+
+def load_students
+  # open file for reading
+  file = File.open("students.csv", "r")
+  # iterate over each line of the file
+  file.readlines.each do |line|
+    name, cohort, gender, height, hobbies = line.chomp.split(",")
+    @students << {name: name, cohort: cohort.to_sym, gender: gender.to_sym, height: height.to_i}
+  end
   file.close
 end
 
@@ -83,10 +97,10 @@ def input_students
     puts "Please enter #{$pronoun[gender][:possessive]} height in cm"
     height = gets.chomp.to_i #to_i deletes any additional characters such as "cm"
 
-    puts "Please enter #{$pronoun[gender][:possessive]} hobbies, press return twice when done"
-    hobbies = set_hobbies
+    #puts "Please enter #{$pronoun[gender][:possessive]} hobbies, press return twice when done"
+    #hobbies = set_hobbies
 
-    @students << {name: name, cohort: cohort, gender: gender, height: height, hobbies: hobbies }
+    @students << {name: name, cohort: cohort, gender: gender, height: height} #hobbies: hobbies }
     
     student_input_count
   end
@@ -146,9 +160,9 @@ def print_students
         puts " - #{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall"
       end
       #if they didn't enter anything, don't print hobbies
-      if student[:hobbies] != []
-        puts " - #{$pronoun[gender][:possessive]} hobbies are #{student[:hobbies].join(", ")}."
-      end
+      #if student[:hobbies] != []
+      #  puts " - #{$pronoun[gender][:possessive]} hobbies are #{student[:hobbies].join(", ")}."
+      #end
     end
   end
 end
