@@ -54,35 +54,39 @@ $pronoun = {
 }
 
 def print_students(names)
-  names.each_with_index do |student, index| 
-    gender = student[:gender]
-    puts "#{index + 1}. #{student[:name]} (#{student[:cohort]} cohort)"
-    #if they didn't enter anything, don't print height
-    if student[:height] > 0
-      puts " - #{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall"
-    end
-    #if they didn't enter anything, don't print hobbies
-    if student[:hobbies] != []
-      puts " - #{$pronoun[gender][:possessive]} hobbies are #{student[:hobbies].join(", ")}."
+  if names.count > 0
+    names.each_with_index do |student, index| 
+      gender = student[:gender]
+      puts "#{index + 1}. #{student[:name]} (#{student[:cohort]} cohort)"
+      #if they didn't enter anything, don't print height
+      if student[:height] > 0
+        puts " - #{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall"
+      end
+      #if they didn't enter anything, don't print hobbies
+      if student[:hobbies] != []
+        puts " - #{$pronoun[gender][:possessive]} hobbies are #{student[:hobbies].join(", ")}."
+      end
     end
   end
 end
 
 def print_by_cohort(names) #user enters the cohort they would like to see
-  puts "Which cohort would you like to see?"
-    months = [:January, :February, :March, :April, :May, :June, :July, :August, :September, :October, :November, :December]
-    #validation - user input matches a valid month
-    while true do
-      cohort = gets.chomp.capitalize.to_sym
-      break if months.any? {|month| month == cohort}
+  if names.count > 0
+    puts "Which cohort would you like to see?"
+      months = [:January, :February, :March, :April, :May, :June, :July, :August, :September, :October, :November, :December]
+      #validation - user input matches a valid month
+      while true do
+        cohort = gets.chomp.capitalize.to_sym
+        break if months.any? {|month| month == cohort}
+      end
+    #creating a new array with just names of student in the selected cohort
+    result = names.select { |student| student[:cohort] == cohort }
+    #print names, or error message
+    if result.empty? 
+      puts "There are no students enrolled on this cohort"
+    else
+      result.each { |student| puts student[:name] }
     end
-  #creating a new array with just names of student in the selected cohort
-  result = names.select { |student| student[:cohort] == cohort }
-  #print names, or error message
-  if result.empty? 
-    puts "There are no students enrolled on this cohort"
-  else
-    result.each { |student| puts student[:name] }
   end
 end
 
@@ -108,9 +112,15 @@ def print_header
 end
 
 def print_footer(names)
-  text =  "Overall, we have #{names.count} great student."
-  #different approach to addressing plural in the case of multiple students
-  puts names.count > 1 ? text.insert(-2, "s") : text
+  text =  "Overall, we have #{names.count} great student.".center(50)
+  #different approach to addressing plural in the case of multiple students / no students
+  if names.count > 1
+    puts text.insert(-2, "s")
+  elsif names.count == 0
+    puts "We currently have no students :(".center(50)
+  else
+    puts text
+  end
 end
 
 def blank_line
