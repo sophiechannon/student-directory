@@ -1,18 +1,13 @@
+@students = []
 def interactive_menu
-  students = []
   loop do
-    puts "1. Input the students"
-    puts "2. Show the students"
-    puts "9. Exit"
+    print_menu
     user_input = gets.chomp
     case user_input
     when "1"
       students = input_students
     when "2"
-      print_header
-      print_students(students)
-      blank_line
-      print_footer(students)
+      show_students
     when "9"
       exit
     else
@@ -23,53 +18,89 @@ def interactive_menu
   end
 end
 
-def input_students
-  students = []
+def print_menu
+  puts "1. Input the students"
+  puts "2. Show the students"
+  puts "9. Exit"
+end
 
+def show_students
+  print_header
+  print_students(@students)
+  blank_line
+  print_footer(@students)
+end
+
+
+def input_students
   while true do
     puts "Enter next student name or press return twice to exit"
     name = gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ") #getting the name and ensuring each word is capitalized
     break if name.empty?
 
+    # assigning centre through set_gender method
     puts "Please enter their gender (M/F/NB)"
-    gender = gets.delete("\n").upcase #using an alternative to chomp
-    #checking that input matches validation, using neutral as default
-    if gender == "M"
-      gender = :male
-    elsif gender == "F"
-      gender = :female
-    else
-      gender = :neutral
-    end
+    gender = set_gender
 
     puts "Which cohort #{$pronoun[gender][:verb]} #{$pronoun[gender][:subject]} on?"
-    months = [:January, :February, :March, :April, :May, :June, :July, :August, :September, :October, :November, :December] #validation
-    while true do
-      cohort = gets.chomp.capitalize.to_sym
-      cohort = :November if cohort.empty?
-      #checking that input matches validation
-      break if months.any? {|month| month == cohort}
-    end
+    cohort = set_cohort
 
     puts "Please enter #{$pronoun[gender][:possessive]} height in cm"
     height = gets.chomp.to_i #to_i deletes any additional characters such as "cm"
 
     puts "Please enter #{$pronoun[gender][:possessive]} hobbies, press return twice when done"
-    hobbies = []
-    #allows input of multiple hobbies into an array
-    while true do
-      input = gets.chomp.downcase
-      !input.empty? ? hobbies << input : break
-    end
+    hobbies = set_hobbies
 
-    students << {name: name, cohort: cohort, gender: gender, height: height, hobbies: hobbies }
-    text = "Now we have #{students.count} student"
-    #pluralises sentence if there are multiple students
-    puts students.count > 1 ? "#{text}s" : text
+    @students << {name: name, cohort: cohort, gender: gender, height: height, hobbies: hobbies }
+    
+    student_input_count
   end
-
-  students
 end
+
+def set_gender
+  gender = gets.delete("\n").upcase #using an alternative to chomp
+  #checking that input matches validation, using neutral as default
+  case gender 
+  when "M"
+    gender = :male
+  when "F"
+    gender = :female
+  else
+    gender = :neutral
+  end
+  gender
+end
+
+def set_cohort
+  months = [:January, :February, :March, 
+            :April, :May, :June, 
+            :July, :August, :September, 
+            :October, :November, :December] #validation
+  while true do
+    cohort = gets.chomp.capitalize.to_sym
+    cohort = :November if cohort.empty?
+    #checking that input matches validation
+    break if months.any? {|month| month == cohort}
+  end
+  cohort
+end
+
+def set_hobbies
+  hobbies = []
+  #allows input of multiple hobbies into an array
+  while true do
+    input = gets.chomp.downcase
+    !input.empty? ? hobbies << input : break
+  end
+  hobbies
+end
+
+def student_input_count
+  text = "Now we have #{@students.count} student"
+  #pluralises sentence if there are multiple students
+  puts @students.count > 1 ? "#{text}s" : text
+end
+
 
 #global pronoun selector
 $pronoun = {
@@ -137,12 +168,12 @@ def print_header
 end
 
 def print_footer(names)
-  text =  "Overall, we have #{names.count} great student.".center(50)
+  text =  "Overall, we have #{names.count} great student."
   #different approach to addressing plural in the case of multiple students / no students
   if names.count > 1
     puts text.insert(-2, "s")
   elsif names.count == 0
-    puts "We currently have no students :(".center(50)
+    puts "We currently have no students :("
   else
     puts text
   end
