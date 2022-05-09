@@ -3,6 +3,11 @@
 # ````
 @students = []
 
+@months = [:January, :February, :March, 
+          :April, :May, :June, 
+          :July, :August, :September, 
+          :October, :November, :December] #validation
+
 $pronoun = {
   male: {subject: "he", verb: "is", possessive: "his"},
   female: {subject: "she", verb: "is", possessive: "her"},
@@ -54,11 +59,11 @@ end
 
 def save_students
   #open file for writing
-  file = File.open("students.csv", "w")
+  file = File.open("students.csv", "a")
   #iterate over students array
   @students.each do |student|
     #converting hash into array
-    student_data = [student[:name], student[:cohort], student[:gender], student[:height]]
+    student_data = [student[:name], student[:cohort], student[:gender], student[:height], student[:hobbies]]
     #converting array into string
     csv_line = student_data.join(",")
     file.puts(csv_line)
@@ -71,8 +76,10 @@ def load_students
   file = File.open("students.csv", "r")
   # iterate over each line of the file
   file.readlines.each do |line|
-    name, cohort, gender, height, hobbies = line.chomp.split(",")
-    @students << {name: name, cohort: cohort.to_sym, gender: gender.to_sym, height: height.to_i}
+    line = line.chomp.split(",")
+    name, cohort, gender, height = line[0..3]
+    hobbies = line[4..-1]
+    @students << {name: name, cohort: cohort.to_sym, gender: gender.to_sym, height: height.to_i, hobbies: hobbies}
   end
   file.close
 end
@@ -97,10 +104,10 @@ def input_students
     puts "Please enter #{$pronoun[gender][:possessive]} height in cm"
     height = gets.chomp.to_i #to_i deletes any additional characters such as "cm"
 
-    #puts "Please enter #{$pronoun[gender][:possessive]} hobbies, press return twice when done"
-    #hobbies = set_hobbies
+    puts "Please enter #{$pronoun[gender][:possessive]} hobbies, press return twice when done"
+    hobbies = set_hobbies
 
-    @students << {name: name, cohort: cohort, gender: gender, height: height} #hobbies: hobbies }
+    @students << {name: name, cohort: cohort, gender: gender, height: height, hobbies: hobbies }
     
     student_input_count
   end
@@ -121,15 +128,11 @@ def set_gender
 end
 
 def set_cohort
-  months = [:January, :February, :March, 
-            :April, :May, :June, 
-            :July, :August, :September, 
-            :October, :November, :December] #validation
   while true do
     cohort = gets.chomp.capitalize.to_sym
     cohort = :November if cohort.empty?
     #checking that input matches validation
-    break if months.any? { |month| month == cohort }
+    break if @months.any? { |month| month == cohort }
   end
   cohort
 end
@@ -159,10 +162,10 @@ def print_students
       if student[:height] > 0
         puts " - #{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall"
       end
-      #if they didn't enter anything, don't print hobbies
-      #if student[:hobbies] != []
-      #  puts " - #{$pronoun[gender][:possessive]} hobbies are #{student[:hobbies].join(", ")}."
-      #end
+      # if they didn't enter anything, don't print hobbies
+      if student[:hobbies] != []
+        puts " - #{$pronoun[gender][:possessive].capitalize} hobbies: #{student[:hobbies].join(", ")}"
+      end
     end
   end
 end
@@ -170,11 +173,10 @@ end
 def print_by_cohort #user enters the cohort they would like to see
   if @student.count > 0
     puts "Which cohort would you like to see?"
-    months = [:January, :February, :March, :April, :May, :June, :July, :August, :September, :October, :November, :December]
     #validation - user input matches a valid month
     while true do
       cohort = gets.chomp.capitalize.to_sym
-      break if months.any? {|month| month == cohort}
+      break if @months.any? {|month| month == cohort}
     end
     #creating a new array with just names of student in the selected cohort
     result = names.select { |student| student[:cohort] == cohort }
