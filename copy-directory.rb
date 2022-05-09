@@ -1,10 +1,24 @@
+# ````
+# global variables etc
+# ````
 @students = []
+
+$pronoun = {
+  male: {subject: "he", verb: "is", possessive: "his"},
+  female: {subject: "she", verb: "is", possessive: "her"},
+  neutral: {subject: "they", verb: "are", possessive: "their"}
+}
+
 def interactive_menu
   loop do
     print_menu
     process(gets.chomp)
   end
 end
+
+# ````
+# menu methods
+# ````
 
 def print_menu
   puts "1. Input the students"
@@ -14,9 +28,9 @@ end
 
 def show_students
   print_header
-  print_students(@students)
+  print_students
   blank_line
-  print_footer(@students)
+  print_footer
 end
 
 def process(selection)
@@ -32,6 +46,9 @@ def process(selection)
   end
 end
 
+# ````
+# functionality methods
+# ````
 
 def input_students
   while true do
@@ -81,7 +98,7 @@ def set_cohort
     cohort = gets.chomp.capitalize.to_sym
     cohort = :November if cohort.empty?
     #checking that input matches validation
-    break if months.any? {|month| month == cohort}
+    break if months.any? { |month| month == cohort }
   end
   cohort
 end
@@ -102,17 +119,9 @@ def student_input_count
   puts @students.count > 1 ? "#{text}s" : text
 end
 
-
-#global pronoun selector
-$pronoun = {
-  male: {subject: "he", verb: "is", possessive: "his"},
-  female: {subject: "she", verb: "is", possessive: "her"},
-  neutral: {subject: "they", verb: "are", possessive: "their"}
-}
-
-def print_students(names)
-  if names.count > 0
-    names.each_with_index do |student, index| 
+def print_students
+  if @students.count > 0
+    @students.each_with_index do |student, index| 
       gender = student[:gender]
       puts "#{index + 1}. #{student[:name]} (#{student[:cohort]} cohort)"
       #if they didn't enter anything, don't print height
@@ -127,15 +136,15 @@ def print_students(names)
   end
 end
 
-def print_by_cohort(names) #user enters the cohort they would like to see
-  if names.count > 0
+def print_by_cohort #user enters the cohort they would like to see
+  if @student.count > 0
     puts "Which cohort would you like to see?"
-      months = [:January, :February, :March, :April, :May, :June, :July, :August, :September, :October, :November, :December]
-      #validation - user input matches a valid month
-      while true do
-        cohort = gets.chomp.capitalize.to_sym
-        break if months.any? {|month| month == cohort}
-      end
+    months = [:January, :February, :March, :April, :May, :June, :July, :August, :September, :October, :November, :December]
+    #validation - user input matches a valid month
+    while true do
+      cohort = gets.chomp.capitalize.to_sym
+      break if months.any? {|month| month == cohort}
+    end
     #creating a new array with just names of student in the selected cohort
     result = names.select { |student| student[:cohort] == cohort }
     #print names, or error message
@@ -147,9 +156,9 @@ def print_by_cohort(names) #user enters the cohort they would like to see
   end
 end
 
-def print_by_cohort_all(names) #shows all student names split by cohort
+def print_by_cohort_all #shows all student names split by cohort
   cohorts = {}
-  names.each do |student|
+  @student.each do |student|
     cohort = student[:cohort]
     #checking if there is already a key for the cohort & creating a new one if not
     cohorts[cohort] = [] if cohorts[cohort] == nil
@@ -159,7 +168,7 @@ def print_by_cohort_all(names) #shows all student names split by cohort
   cohorts.each do |key, value|
     puts key.to_s.center(20)
     puts value
-    puts nil #just a blank line
+    blank_line
   end
 end
 
@@ -168,12 +177,12 @@ def print_header
   puts "-------------".center(50)
 end
 
-def print_footer(names)
-  text =  "Overall, we have #{names.count} great student."
+def print_footer
+  text =  "Overall, we have #{@students.count} great student."
   #different approach to addressing plural in the case of multiple students / no students
-  if names.count > 1
+  if @students.count > 1
     puts text.insert(-2, "s")
-  elsif names.count == 0
+  elsif @students.count == 0
     puts "We currently have no students :("
   else
     puts text
