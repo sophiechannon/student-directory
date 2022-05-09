@@ -56,6 +56,31 @@ def print_students(names)
   end
 end
 
+def print_by_cohort(names)
+  puts "Which cohort would you like to see?"
+    months = [:January, :February, :March, :April, :May, :June, :July, :August, :September, :October, :November, :December]
+    while true do
+      cohort = gets.chomp.capitalize.to_sym
+      break if months.any? {|month| month == cohort}
+    end
+  result = names.select { |student| student[:cohort] == cohort }
+  result.each { |student| puts student[:name] }
+end
+
+def print_by_cohort_all(names)
+  cohorts = {}
+  names.each do |student|
+    cohort = student[:cohort]
+    cohorts[cohort] = [] if cohorts[cohort] == nil
+    cohorts[cohort] << student[:name]
+  end
+  cohorts.each do |key, value|
+    puts key.to_s.center(20)
+    puts value
+    puts nil
+  end
+end
+
 def print_header
   puts "The students of Villains Academy".center(50)
   puts "-------------".center(50)
@@ -72,6 +97,8 @@ end
 students = input_students
 print_header
 blank_line
+print_students(students)
+print_by_cohort_all(students)
 print_students(students)
 blank_line
 print_footer(students)
