@@ -1,9 +1,25 @@
 def interactive_menu
+  students = []
   loop do
     puts "1. Input the students"
     puts "2. Show the students"
     puts "9. Exit"
     user_input = gets.chomp
+    case user_input
+    when "1"
+      students = input_students
+    when "2"
+      print_header
+      print_students(students)
+      blank_line
+      print_footer(students)
+    when "9"
+      exit
+    else
+      puts "Please enter a number between 1 and 9..."
+    end
+
+
   end
 end
 
@@ -136,6 +152,7 @@ def blank_line
   puts nil
 end
 
+=begin
 students = input_students
 print_header
 blank_line
@@ -146,3 +163,6 @@ blank_line
 print_by_cohort(students)
 blank_line
 print_footer(students)
+=end
+
+interactive_menu
