@@ -16,6 +16,14 @@ def input_students
       gender = :neutral
     end
 
+    puts "Which cohort #{$pronoun[gender][:verb]} #{$pronoun[gender][:subject]} on?"
+    months = [:January, :February, :March, :April, :May, :June, :July, :August, :September, :October, :November, :December]
+    while true do
+      cohort = gets.chomp.capitalize.to_sym
+      cohort = :November if cohort.empty?
+      break if months.any? {|month| month == cohort}
+    end
+
     puts "Please enter #{$pronoun[gender][:possessive]} height in cm"
     height = gets.chomp.to_i
 
@@ -25,8 +33,8 @@ def input_students
       input = gets.chomp.downcase
       !input.empty? ? hobbies << input : break
     end
-    
-    students << {name: name, cohort: :November, gender: gender, height: height, hobbies: hobbies }
+
+    students << {name: name, cohort: cohort, gender: gender, height: height, hobbies: hobbies }
     puts "Now we have #{students.count} students"
   end
 
