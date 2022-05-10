@@ -33,6 +33,8 @@ def print_menu
   puts "4. Load students from file"
   puts "5. Search students by cohort"
   puts "6. View students by cohort"
+  puts "7. Remove student"
+  puts "8. No operation"
   puts "9. Exit"
 end
 
@@ -52,7 +54,7 @@ def process(selection)
   when "6"
     print_by_cohort_all
   when "7"
-    puts "I haven't set that one yet, oops"
+    remove_student
   when "8"
     puts "I haven't set that one yet, oops"
   when "9"
@@ -121,7 +123,13 @@ def print_by_cohort #user enters the cohort they would like to see
   #validation - user input matches a valid month
   while true do
     cohort = STDIN.gets.chomp.capitalize
-    break if @months.any? {|month| month == cohort}
+    if @months.any? {|month| month == cohort}
+      break
+    elsif cohort == "Quit"
+      return
+    else
+      puts "That's not a valid entry, try again or type quit to cancel operation"
+    end
   end
   #creating a new array with just names of student in the selected cohort
   result = @students.select { |student| student[:cohort] == cohort }
@@ -228,6 +236,31 @@ def try_load_students(filename = "students.csv")
   end
 end
 
+def remove_student
+  student_to_delete = nil
+  while true do
+    puts "Please enter the name of the student you'd like to remove"
+    input = STDIN.gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ")
+    @students.each_with_index { |student, index| student_to_delete = index if student[:name] == input }
+
+    if student_to_delete != nil
+      @students.delete_at(student_to_delete)
+      puts "#{input} deleted."
+      break
+    else
+      puts "There is no student called `#{input}` on our records. Please select one of the follow students"
+      puts "or type `quit` to cancel operation"
+      print_by_cohort_all
+      return if ask_quit_operation
+    end
+  end
+end
+
+def ask_quit_operation
+  quit = gets.chomp
+  return true if quit == "quit"
+end
+
 # ````
 # printing methods
 # ````
@@ -277,4 +310,5 @@ def blank_line
 end
 
 try_load_students
+p @students
 interactive_menu
