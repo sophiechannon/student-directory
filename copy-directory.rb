@@ -303,6 +303,8 @@ def blank_line
   puts nil
 end
 
+puts File.basename("copy-directory.rb")
+
 try_load_students
 interactive_menu
 
