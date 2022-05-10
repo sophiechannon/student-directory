@@ -6,6 +6,8 @@
 require 'date'
 @months = Date::MONTHNAMES
 
+require 'csv'
+
 $pronoun = {
   "male" => {subject: "he", verb: "is", possessive: "his"},
   "female" => {subject: "she", verb: "is", possessive: "her"},
@@ -99,17 +101,15 @@ def load_students(filename = "students.csv")
   input = gets.chomp.downcase
   filename = save_or_load_new if !input.empty?
   # open file for reading
-  file = File.open(filename, "r") do |file|
-    # iterate over each line of the file
-    file.readlines.each do |line|
-      line = line.chomp.split(",")
-      name, cohort, gender, height = line[0..3]
-      hobbies = line[4..-1]
-      push_to_students(name, cohort, gender, height, hobbies)
-    end
+  file = CSV.foreach(filename) do |file|
+    name, cohort, gender, height = file[0..3]
+    hobbies = file[4..-1]
+    push_to_students(name, cohort, gender, height, hobbies)
   end
   print_load_success_text(filename)
 end
+
+
 
 def save_or_load_new
   puts "Enter file name"
@@ -242,7 +242,6 @@ def remove_student
     puts "Please enter the name of the student you'd like to remove"
     input = STDIN.gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ")
     @students.each_with_index { |student, index| student_to_delete = index if student[:name] == input }
-
     if student_to_delete != nil
       @students.delete_at(student_to_delete)
       puts "#{input} deleted."
@@ -310,5 +309,32 @@ def blank_line
 end
 
 try_load_students
-p @students
 interactive_menu
+
+# ````
+# redundant but useful code for reference
+# ````
+
+=begin
+````Loading students from a file, not one line at a time from a CSV````
+
+def load_students(filename = "students.csv")
+  # check this is the file they want to open
+  puts "You are about to open our default file: #{filename}"
+  puts "Hit enter to continue or type any letter followed by enter to open a different file"
+  input = gets.chomp.downcase
+  filename = save_or_load_new if !input.empty?
+  # open file for reading
+  file = File.open(filename, "r") do |file|
+    # iterate over each line of the file
+    file.readlines.each do |line|
+      line = line.chomp.split(",")
+      name, cohort, gender, height = line[0..3]
+      hobbies = line[4..-1]
+      push_to_students(name, cohort, gender, height, hobbies)
+    end
+  end
+  print_load_success_text(filename)
+end
+
+=end
