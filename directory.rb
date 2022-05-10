@@ -36,7 +36,7 @@ def print_menu
   puts "5. Search students by cohort"
   puts "6. View students by cohort"
   puts "7. Remove student"
-  puts "8. No operation"
+  puts "8. Edit student details"
   puts "9. Exit"
 end
 
@@ -58,7 +58,7 @@ def process(selection)
   when "7"
     remove_student
   when "8"
-    puts "I haven't set that one yet, oops"
+    edit_student
   when "9"
     exit
   else
@@ -152,6 +152,23 @@ def print_by_cohort_all #shows all student names split by cohort
   end
 end
 
+def remove_student
+  @students.delete_at(find_index_of_student_by_name)
+  puts "#{input} deleted."
+      
+end
+
+def edit_student
+  student = find_index_of_student_by_name
+  puts "Which category would you like to edit? name, cohort, gender, height, hobbies"
+  category = gets.chomp.downcase.to_sym
+  puts "Current #{category}: #{@students[student][category]}."
+  puts "Please enter the updated details"
+  new_data = category_selector(category)
+  @students[student][category] = new_data
+  puts "#{@students[student][:name]} updated"
+end
+
 # ````
 # functionality methods
 # ````
@@ -159,7 +176,7 @@ end
 def input_students
   while true do
     puts "Enter next student name or press return twice to exit"
-    name = STDIN.gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ") #getting the name and ensuring each word is capitalized
+    name =  set_name
     break if name.empty?
 
     # assigning centre through set_gender method
@@ -171,7 +188,7 @@ def input_students
     cohort = set_cohort
 
     puts "Please enter #{$pronoun[gender][:possessive]} height in cm"
-    height = STDIN.gets.chomp
+    height = set_height
 
     puts "Please enter #{$pronoun[gender][:possessive]} hobbies, press return twice when done"
     hobbies = set_hobbies
@@ -183,6 +200,11 @@ end
 
 def push_to_students(name, cohort, gender, height, hobbies)
   @students << {name: name, cohort: cohort, gender: gender, height: height.to_i, hobbies: hobbies}
+end
+
+def set_name
+  name = STDIN.gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ") #getting the name and ensuring each word is capitalized
+  name
 end
 
 def set_gender
@@ -211,6 +233,11 @@ def set_cohort
   cohort
 end
 
+def set_height
+  height = STDIN.gets.chomp
+  height
+end
+
 def set_hobbies
   hobbies = []
   #allows input of multiple hobbies into an array
@@ -221,6 +248,40 @@ def set_hobbies
   hobbies
 end
 
+def find_index_of_student_by_name
+  student_index = nil
+  while true do
+    puts "Please enter the name of the student"
+    input = STDIN.gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ")
+    @students.each_with_index { |student, index| student_index = index if student[:name] == input }
+    if input == "Quit"
+      return
+    elsif student_index != nil
+      break
+    else
+      puts "There is no student called `#{input}` on our records. Please select one of the follow students"
+      puts "or type `quit` to cancel operation"
+      print_by_cohort_all
+    end
+  end
+  student_index
+end
+
+def category_selector(category)
+  case category
+  when :name
+    set_name
+  when :cohort
+    set_cohort
+  when :gender
+    set_gender
+  when :height
+    set_height.to_i
+  when :hobbies
+    set_hobbies
+  end
+end
+
 def try_load_students(filename = "students.csv")
   filename = ARGV.first unless ARGV.first.nil? # first argument from the command line
   if File.exist?(filename) # check file exists
@@ -229,30 +290,6 @@ def try_load_students(filename = "students.csv")
     puts "Sorry, #{filename} does not exist."
     exit
   end
-end
-
-def remove_student
-  student_to_delete = nil
-  while true do
-    puts "Please enter the name of the student you'd like to remove"
-    input = STDIN.gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ")
-    @students.each_with_index { |student, index| student_to_delete = index if student[:name] == input }
-    if student_to_delete != nil
-      @students.delete_at(student_to_delete)
-      puts "#{input} deleted."
-      break
-    else
-      puts "There is no student called `#{input}` on our records. Please select one of the follow students"
-      puts "or type `quit` to cancel operation"
-      print_by_cohort_all
-      return if ask_quit_operation
-    end
-  end
-end
-
-def ask_quit_operation
-  quit = gets.chomp
-  return true if quit == "quit"
 end
 
 # ````
@@ -307,53 +344,3 @@ puts File.basename("copy-directory.rb")
 
 try_load_students
 interactive_menu
-
-# ````
-# redundant but useful code for reference
-# ````
-
-=begin
-````Loading students from a file, not one line at a time from a CSV````
-
-def load_students(filename = "students.csv")
-  # check this is the file they want to open
-  puts "You are about to open our default file: #{filename}"
-  puts "Hit enter to continue or type any letter followed by enter to open a different file"
-  input = gets.chomp.downcase
-  filename = save_or_load_new if !input.empty?
-  # open file for reading
-  file = File.open(filename, "r") do |file|
-    # iterate over each line of the file
-    file.readlines.each do |line|
-      line = line.chomp.split(",")
-      name, cohort, gender, height = line[0..3]
-      hobbies = line[4..-1]
-      push_to_students(name, cohort, gender, height, hobbies)
-    end
-  end
-  print_load_success_text(filename)
-end
-
-````Saving to a file, not using CSV library````
-
-def save_students(filename = "students.csv")
-  # check if they want to save or save as
-  puts "You are about to save to #{filename}"
-  puts "Hit enter to continue or type any key followed by enter to save to another / new file"
-  input = gets.chomp
-  filename = save_or_load_new if !input.empty?
-  #open file for writing
-  file = File.open(filename, "w") do |file|
-    #iterate over students array
-    @students.each do |student|
-      #converting hash into array
-      student_data = [student[:name], student[:cohort], student[:gender], student[:height], student[:hobbies]]
-      #converting array into string
-      csv_line = student_data.join(",")
-      file.puts(csv_line)
-    end
-  end 
-  puts "save to #{filename} complete"
-end
-
-=end
