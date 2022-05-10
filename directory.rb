@@ -60,7 +60,7 @@ def process(selection)
   when "8"
     edit_student
   when "9"
-    exit
+    exit_command
   else
     puts "Please enter a number between 1 and 9..."
   end
@@ -167,6 +167,25 @@ def edit_student
   @students[student][category] = new_data
   puts "#{@students[student][:name]} updated"
 end
+
+def exit_command
+  puts "Save changes before quitting? (y/n)"
+  while true do
+    input = gets[0].downcase
+    case input
+    when "y"
+      save_students
+      puts "bye!"
+      exit
+    when "n"
+      puts "bye!"
+      exit
+    else 
+      puts "enter yes or no"
+    end
+  end
+end
+
 
 # ````
 # functionality methods
