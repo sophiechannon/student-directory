@@ -74,19 +74,19 @@ def save_students(filename = "students.csv")
   # check if they want to save or save as
   puts "You are about to save to #{filename}"
   puts "Hit enter to continue or type any key followed by enter to save to another / new file"
-  input = gets.chomp.downcase
+  input = gets.chomp
   filename = save_or_load_new if !input.empty?
   #open file for writing
-  file = File.open(filename, "w")
-  #iterate over students array
-  @students.each do |student|
-    #converting hash into array
-    student_data = [student[:name], student[:cohort], student[:gender], student[:height], student[:hobbies]]
-    #converting array into string
-    csv_line = student_data.join(",")
-    file.puts(csv_line)
+  file = File.open(filename, "w") do |file|
+    #iterate over students array
+    @students.each do |student|
+      #converting hash into array
+      student_data = [student[:name], student[:cohort], student[:gender], student[:height], student[:hobbies]]
+      #converting array into string
+      csv_line = student_data.join(",")
+      file.puts(csv_line)
+    end
   end 
-  file.close
   puts "save to #{filename} complete"
 end
 
@@ -95,17 +95,17 @@ def load_students(filename = "students.csv")
   puts "You are about to open our default file: #{filename}"
   puts "Hit enter to continue or type any letter followed by enter to open a different file"
   input = gets.chomp.downcase
-  filename = save_or_load_new if input == "yes"
+  filename = save_or_load_new if !input.empty?
   # open file for reading
-  file = File.open(filename, "r")
-  # iterate over each line of the file
-  file.readlines.each do |line|
-    line = line.chomp.split(",")
-    name, cohort, gender, height = line[0..3]
-    hobbies = line[4..-1]
-    push_to_students(name, cohort, gender, height, hobbies)
+  file = File.open(filename, "r") do |file|
+    # iterate over each line of the file
+    file.readlines.each do |line|
+      line = line.chomp.split(",")
+      name, cohort, gender, height = line[0..3]
+      hobbies = line[4..-1]
+      push_to_students(name, cohort, gender, height, hobbies)
+    end
   end
-  file.close
   print_load_success_text(filename)
 end
 
