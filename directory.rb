@@ -106,13 +106,6 @@ def load_students(filename = "students.csv")
   print_load_success_text(filename)
 end
 
-def save_or_load_new
-  puts "Enter file name"
-  filename = STDIN.gets.chomp
-  filename = "#{filename}.csv" if !filename.include?(".csv")
-  filename
-end
-
 def print_by_cohort #user enters the cohort they would like to see
   puts "Which cohort would you like to see?"
   #validation - user input matches a valid month
@@ -153,16 +146,22 @@ def print_by_cohort_all #shows all student names split by cohort
 end
 
 def remove_student
-  @students.delete_at(find_index_of_student_by_name)
-  puts "#{input} deleted."
-      
+  result = find_index_of_student_by_name
+  return if result == "Quit"
+  puts "#{@students[result][:name]} deleted."
+  @students.delete_at(result)
 end
 
 def edit_student
   student = find_index_of_student_by_name
+  return if student == "Quit"
   puts "Which category would you like to edit? name, cohort, gender, height, hobbies"
   category = gets.chomp.downcase.to_sym
-  puts "Current #{category}: #{@students[student][category]}."
+  if cateogry == :hobbies
+    puts "Current #{category}: #{@students[student][category].join(", ")}."
+  else 
+    puts puts "Current #{category}: #{@students[student][category]}."
+  end
   puts "Please enter the updated details"
   new_data = category_selector(category)
   @students[student][category] = new_data
@@ -253,10 +252,9 @@ def find_index_of_student_by_name
   while true do
     puts "Please enter the name of the student"
     input = STDIN.gets.chomp.split(" ").map!{|x| x.capitalize}.join(" ")
+    return input if input == "Quit"
     @students.each_with_index { |student, index| student_index = index if student[:name] == input }
-    if input == "Quit"
-      return
-    elsif student_index != nil
+    if student_index != nil
       break
     else
       puts "There is no student called `#{input}` on our records. Please select one of the follow students"
@@ -280,6 +278,13 @@ def category_selector(category)
   when :hobbies
     set_hobbies
   end
+end
+
+def save_or_load_new
+  puts "Enter file name"
+  filename = STDIN.gets.chomp
+  filename = "#{filename}.csv" if !filename.include?(".csv")
+  filename
 end
 
 def try_load_students(filename = "students.csv")
@@ -339,8 +344,6 @@ end
 def blank_line
   puts nil
 end
-
-puts File.basename("copy-directory.rb")
 
 try_load_students
 interactive_menu
