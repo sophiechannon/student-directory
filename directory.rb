@@ -130,17 +130,10 @@ def print_by_cohort #user enters the cohort they would like to see
 end
 
 def print_by_cohort_all #shows all student names split by cohort
-  cohorts = {}
-  @students.each do |student|
-    cohort = student[:cohort]
-    #checking if there is already a key for the cohort & creating a new one if not
-    cohorts[cohort] = [] if cohorts[cohort] == nil
-    #pushing student name to corresponding key
-    cohorts[cohort] << student[:name]
-  end
-  cohorts.each do |key, value|
-    puts key.to_s.center(20)
-    puts value
+  cohorts = @students.map { |student| student[:cohort] } .uniq
+  cohorts.each do |month|
+    puts month
+    @students.each {|student| puts student[:name] if month == student[:cohort]}
     blank_line
   end
 end
