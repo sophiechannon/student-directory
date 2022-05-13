@@ -85,7 +85,7 @@ def save_students(filename = "students.csv")
     #iterate over students array
     @students.each do |student|
       # push each line directly to CSV
-      file << [student[:name], student[:cohort], student[:gender], student[:height], student[:hobbies]]
+      file << [student[:name], student[:cohort], student[:gender], student[:height], student[:hobbies].join(",")]
     end
   end 
   puts "save to #{filename} complete"
@@ -100,7 +100,7 @@ def load_students(filename = "students.csv")
   # open file for reading
   CSV.foreach(filename) do |file|
     name, cohort, gender, height = file[0..3]
-    hobbies = file[4..-1]
+    hobbies = file[4].split(",")
     push_to_students(name, cohort, gender, height, hobbies)
   end
   print_load_success_text(filename)
@@ -358,4 +358,5 @@ def blank_line
 end
 
 try_load_students
+p @students
 interactive_menu
