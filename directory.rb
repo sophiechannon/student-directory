@@ -8,7 +8,7 @@ require 'date'
 
 require 'csv'
 
-$pronoun = {
+@pronoun = {
   "male" => {subject: "he", verb: "is", possessive: "his"},
   "female" => {subject: "she", verb: "is", possessive: "her"},
   "neutral" => {subject: "they", verb: "are", possessive: "their"}
@@ -150,7 +150,7 @@ def edit_student
   return if student == "Quit"
   puts "Which category would you like to edit? name, cohort, gender, height, hobbies"
   category = gets.chomp.downcase.to_sym
-  if cateogry == :hobbies
+  if category == :hobbies
     puts "Current #{category}: #{@students[student][category].join(", ")}."
   else 
     puts puts "Current #{category}: #{@students[student][category]}."
@@ -194,14 +194,14 @@ def input_students
     puts "Please enter their gender (M/F/NB)"
     gender = set_gender
 
-    puts "Which cohort #{$pronoun[gender][:verb]} #{$pronoun[gender][:subject]} on?"
+    puts "Which cohort #{@pronoun[gender][:verb]} #{@pronoun[gender][:subject]} on?"
     puts "leave blank if they are in the current month's cohort"
     cohort = set_cohort
 
-    puts "Please enter #{$pronoun[gender][:possessive]} height in cm"
+    puts "Please enter #{@pronoun[gender][:possessive]} height in cm"
     height = set_height
 
-    puts "Please enter #{$pronoun[gender][:possessive]} hobbies, press return twice when done"
+    puts "Please enter #{@pronoun[gender][:possessive]} hobbies, press return twice when done"
     hobbies = set_hobbies
 
     push_to_students(name, cohort, gender, height, hobbies)
@@ -233,11 +233,10 @@ def set_gender
 end
 
 def set_cohort
-  current_month = Time.now.month
   while true do
     cohort = STDIN.gets.chomp.capitalize
     # using current month as default if no month entered
-    cohort = @months[current_month] if cohort.empty?
+    cohort = @months[Time.now.month] if cohort.empty?
     #checking that input matches validation
     break if @months[1..12].any? { |month| month == cohort }
   end
@@ -325,11 +324,11 @@ def print_students
     puts "#{index + 1}. #{student[:name]} (#{student[:cohort]} cohort)"
     #if they didn't enter anything, don't print height
     if student[:height] > 0
-      puts " - #{$pronoun[gender][:subject].capitalize} #{$pronoun[gender][:verb]} #{student[:height]}cm tall"
+      puts " - #{@pronoun[gender][:subject].capitalize} #{@pronoun[gender][:verb]} #{student[:height]}cm tall"
     end
     # if they didn't enter anything, don't print hobbies
     if student[:hobbies] != []
-      puts " - #{$pronoun[gender][:possessive].capitalize} hobbies: #{student[:hobbies].join(", ")}"
+      puts " - #{@pronoun[gender][:possessive].capitalize} hobbies: #{student[:hobbies].join(", ")}"
     end
   end
 end
