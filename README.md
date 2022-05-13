@@ -11,9 +11,9 @@ The student directory script allows you to manage the list of students enrolled 
 * remove students
 * edit students
 
-**Bonus Features**
+## Bonus features
 
-Features I have added that were not required by the exercise:
+**Features I have added that were not required by the exercise:**
 
 * pronoun switcher that uses gender specific or neutral pronouns depending on the students selected gender
 * save as
