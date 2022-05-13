@@ -43,7 +43,7 @@ end
 def process(selection)
   case selection
   when "1"
-    students = input_students
+    input_students
     puts "input complete"
   when "2"
     show_students
@@ -358,5 +358,4 @@ def blank_line
 end
 
 try_load_students
-p @students
 interactive_menu
